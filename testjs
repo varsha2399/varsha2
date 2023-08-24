@@ -1,0 +1,39 @@
+// login-authentication-tests.js
+
+import { Selector, ClientFunction } from 'testcafe';
+
+// URL of your application's login page
+const loginPageUrl = 'https://your-app.com/login';
+
+fixture('Login and User Authentication Tests')
+  .page(loginPageUrl);
+
+test('Successful login with valid credentials', async t => {
+  await t
+    .typeText('#username', 'validUsername')
+    .typeText('#password', 'validPassword')
+    .click('#loginButton')
+    .expect(Selector('#dashboard').exists).ok(); // Replace #dashboard with your actual dashboard selector
+});
+test('User is redirected to the dashboard after successful login', async t => {
+  await t
+    .typeText('#username', 'validUsername')
+    .typeText('#password', 'validPassword')
+    .click('#loginButton')
+    .expect(Selector('#dashboard').exists).ok();
+
+  const getLocation = ClientFunction(() => window.location.href);
+  const expectedDashboardUrl = 'https://your-app.com/dashboard'; // Replace with your actual dashboard URL
+  await t.expect(getLocation()).eql(expectedDashboardUrl);
+});
+
+test('User remains on the login page after unsuccessful login attempts', async t => {
+  await t
+    .typeText('#username', 'invalidUsername')
+    .typeText('#password', 'invalidPassword')
+    .click('#loginButton')
+    .expect(Selector('.error-message').exists).ok();
+
+  const getLocation = ClientFunction(() => window.location.href);
+  await t.expect(getLocation()).eql(loginPageUrl);
+});
